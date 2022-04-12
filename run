@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+import argparse, os, sys
+import subprocess
+
+ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+P4APP = os.path.join(os.path.join(ROOT_DIR, os.path.join(".deps", "p4app")), "p4app")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        if sys.argv[1] == "run" or sys.argv[1] == "exec":
+            app_dir = sys.argv[2]
+            logs_dir = os.path.join(
+                ROOT_DIR, os.path.join("Logs", app_dir.split(os.sep)[-1])
+            )
+            if not os.path.exists(logs_dir):
+                os.mkdir(logs_dir)
+
+            env = os.environ.copy()
+            env["P4APP_LOGDIR"] = logs_dir
+
+            cmd = subprocess.run([P4APP, "run", app_dir], env=env)
+            if cmd.returncode:
+                os.removedirs(logs_dir)
